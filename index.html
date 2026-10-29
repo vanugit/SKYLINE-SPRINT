@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10172b">
+  <title>Skyline Sprint — Rooftop Rush</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #10172b;
+      color: #f7f8ff;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100svh;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 0%, #273454 0, transparent 47%),
+        linear-gradient(160deg, #121a31, #0b1020 70%);
+    }
+    button { font: inherit; }
+    .shell {
+      width: min(1180px, 100%);
+      min-height: 100svh;
+      margin: auto;
+      padding: clamp(14px, 3vw, 30px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 2;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 14px;
+      display: grid; place-items: center;
+      color: #141a2d; font-weight: 1000; font-size: 23px;
+      background: linear-gradient(145deg, #b8ff6a, #67e9cc);
+      box-shadow: 0 7px 25px #67e9cc35;
+      transform: rotate(-7deg);
+    }
+    .brand-copy { line-height: 1.05; }
+    .brand-name { font-weight: 900; letter-spacing: -.045em; font-size: 17px; }
+    .brand-kicker { color: #9daac7; font-size: 10px; text-transform: uppercase; letter-spacing: .18em; margin-top: 5px; }
+    .best {
+      color: #d7ddf0; border: 1px solid #ffffff20; background: #ffffff08;
+      border-radius: 999px; padding: 9px 13px; font-size: 12px; font-weight: 700;
+    }
+    .best strong { color: #c1ff7a; margin-left: 5px; }
+    .game-card {
+      position: relative; flex: 1; min-height: 350px; overflow: hidden;
+      border: 1px solid #ffffff19; border-radius: 26px;
+      background: #171f36; box-shadow: 0 24px 80px #03071380;
+      isolation: isolate;
+    }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    .hud {
+      position: absolute; inset: 18px 18px auto;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      pointer-events: none; z-index: 2;
+    }
+    .stat {
+      min-width: 94px; padding: 10px 13px; border-radius: 14px;
+      background: #10172bc9; border: 1px solid #ffffff20; backdrop-filter: blur(10px);
+    }
+    .stat-label { color: #9daac7; font-size: 9px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .stat-value { font-size: 20px; font-weight: 900; line-height: 1.25; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .stat-row { display: flex; gap: 8px; }
+    .coin-value { color: #d5ff78; }
+    .pause-button {
+      pointer-events: auto; width: 42px; height: 42px; border-radius: 13px;
+      color: #fff; background: #10172bc9; border: 1px solid #ffffff24;
+      display: grid; place-items: center; cursor: pointer; font-size: 15px;
+    }
+    .pause-button:hover { background: #26314e; }
+    .overlay {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      padding: 24px; z-index: 3;
+      background: linear-gradient(90deg, #10172b35, #10172b08 60%, #10172b35);
+      transition: opacity .2s ease, visibility .2s ease;
+    }
+    .overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .panel {
+      width: min(440px, 100%); padding: clamp(24px, 5vw, 42px);
+      text-align: center; border-radius: 24px;
+      background: linear-gradient(145deg, #151d34ed, #10172beF);
+      border: 1px solid #ffffff24; box-shadow: 0 20px 70px #080e1db0;
+      backdrop-filter: blur(16px);
+    }
+    .eyebrow {
+      color: #c4ff7b; font-size: 10px; font-weight: 900; letter-spacing: .22em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    h1 { margin: 0; font-size: clamp(38px, 7vw, 64px); line-height: .9; letter-spacing: -.075em; font-weight: 1000; }
+    h1 span { color: #c5ff76; }
+    .lede { color: #c0c9df; font-size: 14px; line-height: 1.6; margin: 18px auto 23px; max-width: 330px; }
+    .primary {
+      width: 100%; border: 0; border-radius: 14px; padding: 15px 20px;
+      background: linear-gradient(100deg, #c8ff75, #8ff3b0);
+      color: #15202a; font-size: 14px; font-weight: 950; letter-spacing: .02em;
+      cursor: pointer; box-shadow: 0 8px 26px #aaf77438;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .primary:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .primary:active { transform: translateY(0); }
+    .key-hints {
+      margin-top: 19px; display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 9px 14px; color: #aab5cd; font-size: 11px;
+    }
+    .key { display: inline-flex; align-items: center; gap: 5px; }
+    kbd {
+      color: #eff3ff; font: 800 10px ui-sans-serif, system-ui;
+      border: 1px solid #ffffff35; border-bottom-width: 2px; border-radius: 5px;
+      padding: 3px 6px; background: #ffffff0b;
+    }
+    .footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      color: #8290ad; font-size: 11px; padding: 0 4px;
+    }
+    .footer strong { color: #abb7d1; font-weight: 700; }
+    .touch-controls { display: none; }
+    @media (max-width: 640px) {
+      .shell { padding: 12px; gap: 10px; }
+      .game-card { border-radius: 19px; }
+      .hud { inset: 12px 12px auto; }
+      .stat { min-width: 66px; padding: 8px 8px; border-radius: 12px; }
+      .stat-value { font-size: 17px; }
+      .stat-row { gap: 6px; }
+      .pause-button { width: 38px; height: 38px; }
+      .footer { font-size: 10px; }
+      .touch-controls {
+        position: absolute; display: flex; justify-content: space-between;
+        left: 16px; right: 16px; bottom: 15px; z-index: 2; pointer-events: none;
+      }
+      .touch-group { display: flex; gap: 8px; }
+      .touch-button {
+        pointer-events: auto; width: 45px; height: 45px; border: 1px solid #ffffff35;
+        border-radius: 14px; background: #11182dcc; color: #f7f8ff;
+        font-size: 17px; font-weight: 900; backdrop-filter: blur(8px);
+        touch-action: manipulation;
+      }
+      .touch-button:active { background: #c3ff78; color: #14202d; }
+    }
+    @media (max-height: 560px) and (min-width: 641px) {
+      .shell { padding-top: 12px; padding-bottom: 12px; gap: 9px; }
+      .game-card { min-height: 300px; }
+      .panel { padding: 22px 30px; }
+      .lede { margin: 12px auto 16px; }
+      .key-hints { margin-top: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">↗</div>
+        <div class="brand-copy">
+          <div class="brand-name">SKYLINE SPRINT</div>
+          <div class="brand-kicker">3D courier run · sunset district</div>
+        </div>
+      </div>
+      <div class="best">PERSONAL BEST <strong id="bestScore">0</strong></div>
+    </header>
+    <section class="game-card" aria-label="Skyline Sprint game">
+      <canvas id="game" aria-label="Three-lane rooftop running game"></canvas>
+      <div class="hud">
+        <div class="stat-row">
+          <div class="stat"><div class="stat-label">Distance</div><div class="stat-value" id="distance">0 m</div></div>
+          <div class="stat"><div class="stat-label">Tokens</div><div class="stat-value coin-value" id="tokens">0</div></div>
+          <div class="stat"><div class="stat-label">Board</div><div class="stat-value coin-value" id="boardStatus">Ready</div></div>
+        </div>
+        <button class="pause-button" id="pause" aria-label="Pause game" title="Pause (P)">Ⅱ</button>
+      </div>
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <div class="eyebrow" id="eyebrow">One more rooftop</div>
+          <h1 id="title">SKYLINE<br><span>SPRINT</span></h1>
+          <p class="lede" id="lede">One last delivery before sundown. Weave through a living 3D city, snag the sky-gems, and outrun the rooftops. Press Space to ride your hoverboard and survive one crash.</p>
+          <button class="primary" id="start">START RUN <span aria-hidden="true">→</span></button>
+          <div class="key-hints">
+            <span class="key"><kbd>←</kbd><kbd>→</kbd> Switch lanes</span>
+            <span class="key"><kbd>↑</kbd> Jump</span>
+            <span class="key"><kbd>↓</kbd> Slide</span>
+            <span class="key"><kbd>Space</kbd> Hoverboard</span>
+          </div>
+        </div>
+      </div>
+      <div class="touch-controls" aria-label="Touch controls">
+        <div class="touch-group"><button class="touch-button" data-action="left" aria-label="Move left">←</button><button class="touch-button" data-action="right" aria-label="Move right">→</button></div>
+        <div class="touch-group"><button class="touch-button" data-action="board" aria-label="Activate hoverboard">◇</button><button class="touch-button" data-action="slide" aria-label="Slide">↓</button><button class="touch-button" data-action="jump" aria-label="Jump">↑</button></div>
+      </div>
+    </section>
+    <footer class="footer"><span><strong>Arrows</strong> move/jump/slide · <strong>Space</strong> hoverboard · <strong>P</strong> pause</span><span>Built for the rooftops ✦</span></footer>
+  </main>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
